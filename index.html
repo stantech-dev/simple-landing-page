@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Early access</title>
+<meta name="description" content="Turn speech into notes and notes back into speech, built for Swahili and English. Early access opens soon.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #94c0e9;
+    --surface: #89bef3;
+    --field: #12293b;
+    --line: #5affff;
+    --text: #f9fff2;
+    --muted: #12293b;
+    --cyan: #022d33;
+    --blue: #224a8a;
+    --sky: #2674d4;
+    --error: #f80021;
+    --display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+    --body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+  }
+  a { color: var(--sky); }
+  :focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; border-radius: 4px; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 1.25rem; }
+
+  header { padding: 0.5rem 0 0; }
+  .wordmark { font-family:"rostex"; font-weight: 800; font-size: clamp(1.75rem, 4vw, 3.75rem); letter-spacing: -0.10em; color:var(--blue); }
+  .brand { display: flex; align-items: center; gap: 0.75rem; }
+  .logo { height: clamp(42px, 10vw, 90px); width: auto; display: block; }
+
+
+  /* Footer Styling */
+.site-footer {
+    background-color: #94c0e9; 
+    padding: 30px 20px;
+    text-align: center;
+    border-top: 1px solid #5affff;
+    margin-top: 50px;
+    font-family: inherit;
+}
+
+.footer-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    margin-bottom: 10px;
+}
+
+.footer-logo {
+    height: 45px; 
+    width: auto;
+}
+
+.footer-company-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    font-family: "rostex";
+    color: var(--blue);
+    letter-spacing: -0.10em;
+}
+
+.footer-links {
+    margin-bottom: 20px;
+}
+
+.footer-links a {
+    text-decoration: none;
+    color: #0056b3;
+    margin: 15px;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+    color: #004491;
+    text-decoration: underline;
+}
+
+.footer-copyright {
+    font-size: 0.85rem;
+    color: #5f6c77;
+    margin: 0;
+}
+
+  /* Hero: intro, sign-up card, demo. On phones the form comes right after the intro. */
+  .hero {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "intro" "card" "demo";
+    padding: 2.5rem 0 4rem;
+  }
+  .intro { grid-area: intro; }
+  .card  { grid-area: card; }
+  .demo  { grid-area: demo; }
+  @media (min-width: 900px) {
+    .hero {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      grid-template-areas: "intro card" "demo card";
+      column-gap: 4rem;
+      row-gap: 2.5rem;
+      padding-top: 4rem;
+    }
+    .card { align-self: start; }
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(2.25rem, 6vw, 3.75rem);
+    line-height: 1.04;
+    letter-spacing: -0.025em;
+    margin: 0 0 1.25rem;
+    max-width: 16ch;
+  }
+  .lede { color: var(--muted); font-size: 1.1875rem; max-width: 46ch; margin: 0; }
+
+  /* The one memorable element: a waveform that settles into a mixed-language note. */
+  .demo-wave { display: flex; align-items: center; gap: 5.5px; height: 54px; margin-bottom: 1.50rem; }
+  .demo-wave i {
+    flex: 1;
+    max-width: 9px;
+    height: calc(var(--h) * 1%);
+    border-radius: 99px;
+    background: linear-gradient(to top, var(--blue), var(--cyan));
+    transform-origin: center;
+    animation: pulse 1.5s ease-in-out infinite;
+    animation-delay: var(--d);
+  }
+  @keyframes pulse { 0%, 100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }
+
+  .note {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.25rem 1.375rem;
+  }
+  .note h2 { font-family: var(--display); font-size: 1.0625rem; font-weight: 600; margin: 0 0 0.5rem; color: var(--cyan); }
+  .note p { margin: 0 0 0.375rem; }
+  .caption { color: var(--muted); font-size: 0.875rem; margin: 0.75rem 0 0; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 1.75rem 1.5rem;
+  }
+  .card h2 { font-family: var(--display); font-size: 1.625rem; line-height: 1.15; margin: 0 0 0.375rem; }
+  .card .sub { color: var(--muted); margin: 0 0 1.5rem; font-size: 1rem; }
+
+  .field { margin-bottom: 1rem; }
+  label.lbl { display: block; font-weight: 600; font-size: 0.9375rem; margin-bottom: 0.375rem; }
+  .opt { color: var(--muted); font-weight: 400; }
+  input[type="text"], input[type="email"], select {
+    width: 100%;
+    font: inherit;
+    font-size: 1rem;
+    color: var(--text);
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0.75rem 0.875rem;
+    min-height: 48px;
+  }
+  select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 20px) 50%, calc(100% - 14px) 50%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 2.5rem; }
+  input:focus-visible, select:focus-visible { outline: 3px solid var(--cyan); outline-offset: 1px; border-color: var(--cyan); }
+  .row { display: grid; gap: 1rem; }
+  @media (min-width: 520px) { .row { grid-template-columns: 1fr 1fr; } }
+
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+  .consent { display: flex; gap: 0.75rem; align-items: flex-start; margin: 1.25rem 0; font-size: 0.9375rem; color: var(--muted); }
+  .consent input { width: 22px; height: 22px; margin: 2px 0 0; flex: none; accent-color: var(--cyan); }
+  .linklike { background: none; border: 0; padding: 0; font: inherit; color: var(--sky); text-decoration: underline; cursor: pointer; }
+
+  .btn {
+    width: 100%;
+    min-height: 52px;
+    font: inherit;
+    font-weight: 600;
+    font-size: 1.0625rem;
+    color: #04101a;
+    background: linear-gradient(90deg, var(--cyan), var(--sky));
+    border: 0;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn[disabled] { opacity: 0.6; cursor: wait; }
+  .fineprint { color: var(--muted); font-size: 0.875rem; margin: 0.875rem 0 0; text-align: center; }
+  .error { color: var(--error); font-size: 0.9375rem; margin: 0 0 1rem; min-height: 0; }
+  .error:empty { display: none; }
+  .done h2 { color: var(--cyan); }
+  .done p { margin: 0 0 0.75rem; }
+
+  .features { border-top: 1px solid var(--line); padding: 3.5rem 0; }
+  .features h2 { font-family: var(--display); font-size: clamp(1.5rem, 4vw, 2.125rem); letter-spacing: -0.015em; margin: 0 0 2rem; }
+  .cols { display: grid; gap: 2rem; }
+  @media (min-width: 800px) { .cols { grid-template-columns: repeat(3, 1fr); gap: 2.5rem; } }
+  .cols h3 { font-family: var(--display); font-size: 1.1875rem; margin: 0 0 0.5rem; }
+  .cols p { color: var(--muted); margin: 0; }
+  .soon { color: var(--cyan); font-weight: 600; }
+
+  footer { border-top: 1px solid var(--line); padding: 1.75rem 0 2.5rem; color: var(--muted); font-size: 0.9375rem; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; justify-content: space-between; }
+  footer nav { display: flex; gap: 1.25rem; }
+
+  dialog {
+    width: min(680px, calc(100% - 2rem));
+    max-height: 85vh;
+    overflow: auto;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 1.5rem;
+  }
+  dialog::backdrop { background: rgba(3, 10, 17, 0.8); }
+  dialog h2 { font-family: var(--display); margin: 0 0 0.25rem; }
+  dialog h3 { font-size: 1rem; margin: 1.25rem 0 0.25rem; }
+  dialog p, dialog li { color: var(--muted); font-size: 0.9375rem; margin: 0 0 0.5rem; }
+  dialog ul { padding-left: 1.25rem; margin: 0 0 0.5rem; }
+  .close { margin-top: 1.25rem; width: auto; padding: 0 1.5rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .demo-wave i { animation: none; transform: scaleY(0.8); }
+    .btn:hover { filter: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap brand">
+    <img src="images/logo.png" alt="" class="logo" height="40">
+    <link rel="icon" href="logo.png">
+    <span class="wordmark" data-bind="PRODUCT_NAME">Your Product</span>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+
+    <div class="intro">
+      <h1>Tired of writing notes? Gvoi does it for you!</h1>
+      <p class="lede">An AI voice tool built for East African languages. More to be added</p>
+    </div>
+
+    <section class="card" aria-labelledby="signup-title" id="card">
+      <form id="signup" novalidate>
+        <h2 id="signup-title">Sign up</h2>
+        <p class="sub">Get full AI voice experience</p>
+
+        <p class="error" id="error" role="alert"></p>
+
+        <div class="field">
+          <label class="lbl" for="name">Full name</label>
+          <input type="text" id="name" name="name" autocomplete="name" maxlength="100" required>
+        </div>
+        <div class="field">
+          <label class="lbl" for="email">Email address</label>
+          <input type="email" id="email" name="email" autocomplete="email" inputmode="email" maxlength="254" required>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label class="lbl" for="use_case">Main use</label>
+            <select id="use_case" name="use_case" required>
+              <option value="">Choose one</option>
+              <option value="lectures">Lectures</option>
+              <option value="meetings">Meetings</option>
+              <option value="voiceovers">Voiceovers</option>
+              <option value="other">Something else</option>
+        
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl" for="language">Language</label>
+            <select id="language" name="language" required>
+              <option value="">Choose one</option>
+              <option value="swahili">Swahili</option>
+              <option value="english">English</option>
+              <option value="kinyarwanda">Kinyarwanda</option>
+              <option value="amharic">Amharic</option>
+              <option value="somali">Somali</option>
+              <option value="both">Both(Swahili,English)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="hp" aria-hidden="true">
+          <label>Company <input type="text" name="company" id="company" tabindex="-1" autocomplete="off"></label>
+        </div>
+
+        <div class="consent">
+          <input type="checkbox" id="consent" name="consent" required>
+          <label for="consent">I agree to the <button type="button" class="linklike" data-open="terms">Terms</button> and the <button type="button" class="linklike" data-open="privacy">Privacy Notice</button> on this platform</label>
+        </div>
+
+        <button type="submit" class="btn" id="submit">Create an account</button>
+        <p class="fineprint">Completely free to create an account.</p>
+      </form>
+
+      <div class="done" id="done" hidden tabindex="-1">
+        <h2 id="done-title">You're in.</h2>
+        <p id="done-msg"></p>
+        <p>Nothing else to do for now. We'll be in touch when early access opens.</p>
+      </div>
+    </section>
+
+    <div class="demo" aria-hidden="false">
+      <div class="demo-wave" id="wave" aria-hidden="true"></div>
+      <div class="note">
+        <h2>Sample notes</h2>
+        <p>Kesho tutakutana library saa nane.</p>
+        <p>Everyone should bring their assignment drafts.</p>
+        <p>Proffesor amesema deadline ni Friday.</p>
+      </div>
+      <p class="caption">An illustration of the kind of mixed Swahili and English note we're building.</p>
+    </div>
+
+  </div>
+
+  <section class="features">
+    <div class="wrap">
+      <h2>What we're building <span class="soon"></span></h2>
+      <div class="cols">
+        <div>
+          <h3>Notes from speech</h3>
+          <p>★ Record a lecture or a meeting and AI generates precise notes</p>
+          <p>★ FULL & SUMMARIZED notes</p>
+        </div>
+        <div>
+          <h3>Audio notes</h3>
+          <p>★ Convert your written notes into audio notes you can listen to anywhere</p>
+          <p>★ Choose the voice of choice for the audio from our voice library</p>
+        </div>
+        <div>
+          <h3>Swahili and English together</h3>
+          <p>★ Designed for users taking notes from students, secretaries to church attendees</p>
+          <p>★ Designed for people who switch languages mid-sentence, not just one language-speech.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-container">
+        <div class="footer-brand">
+            <img src="images/logo.png" alt="GiNT Logo" class="footer-logo">
+            <span class="footer-company-name">Gvoi</span>
+        </div>
+
+        <!-- Links Section -->
+        <div class="footer-links">
+            <a href="#terms" data-open="terms">Terms</a>
+            <a href="#privacy" data-open="privacy">Privacy Notice</a>
+            <a href="https://mail.google.com/mail/?view=cm&to=gint.ai.af@gmail.com&su=Early%20access%20to%20Gvoi" target="_blank">Contact</a>
+        </div>
+
+        <!-- Copyright -->
+        <p class="footer-copyright">© 2026 GiNT. All rights reserved.</p>
+    </div>
+</footer>
+
+<dialog id="terms" aria-labelledby="terms-title">
+  <h2 id="terms-title">Terms of early access</h2>
+  <p>Last updated: 19 October 2026</p>
+  <h3>What you're signing up for</h3>
+  <p>By signing up you're asking <span data-bind="OWNER_NAME">GiNT</span> ("we") to give you early access to <span data-bind="PRODUCT_NAME">Your Product</span> when it becomes available. The product is still in development. Signing up doesn't create a working account today and doesn't guarantee a launch date or that every feature will be included.</p>
+  <h3>Cost</h3>
+  <p>Signing up is free. If paid plans are introduced later, you'll be told before you're charged anything, and you can decline.</p>
+  <h3>Your details</h3>
+  <p>Please give a real name and an email address you own. We use your details as described in the Privacy Notice.</p>
+  <h3>Changes</h3>
+  <p>We may change these terms or the product before launch. If a change affects you materially, we'll email you.</p>
+  <h3>Governing law</h3>
+  <p>These terms are governed by the laws of Kenya.</p>
+  <h3>Contact</h3>
+  <p><span data-bind="CONTACT_EMAIL">gint.ai.af@gmail.com</span></p>
+  <button type="button" class="btn close" data-close>Close</button>
+</dialog>
+
+<dialog id="privacy" aria-labelledby="privacy-title">
+  <h2 id="privacy-title">Privacy Notice</h2>
+  <p>Last updated: 19 October 2026</p>
+  <h3>Who we are</h3>
+  <p><span data-bind="OWNER_NAME">GiNT</span> decides why and how your personal data is used (the "data controller"). Contact: <span data-bind="CONTACT_EMAIL">gint.ai.af@gmail.com</span>.</p>
+  <h3>What we collect through this form</h3>
+  <ul>
+    <li>Your name and email address</li>
+    <li>Your main use and language</li>
+    <li>Which link or channel brought you here, and the date and time you signed up</li>
+  </ul>
+  <p>We don't collect voice recordings through this page.</p>
+  <h3>Why we use it</h3>
+  <ul>
+    <li>To email you about early access and the launch</li>
+    <li>To measure how many people are interested and what they want to tailor the product to customer's interest</li>
+  </ul>
+  <p>We use your data only for these purposes, on the basis of your consent.</p>
+  <h3>Where it's stored and who sees it</h3>
+  <p>Your data is stored to a trusted third-party company, Supabase, whose servers might be outside Africa. Only we can read your. We don't sell your data or share it for advertising.</p>
+  <h3>How long we keep it</h3>
+  <p>Until you ask us to delete it, or until 12 months after the product launches, whichever comes first.</p>
+  <h3>Your rights</h3>
+  <p>Under Kenya's Data Protection Act, 2019, you can ask to see your data, correct it, delete it, or withdraw your consent at any time by emailing <span data-bind="CONTACT_EMAIL">gint.ai.af@gmail.com</span>. If you're unhappy with how we handle your data, reach out for complains.</p>
+  <button type="button" class="btn close" data-close>Close</button>
+</dialog>
+
+<script>
+
+  const CONFIG = {
+    PRODUCT_NAME: "Gvoi",
+    OWNER_NAME: "GiNT",
+    CONTACT_EMAIL: "gint.ai.af@gmail.com",
+    SUPABASE_URL: "https://qlepvpqdottbhjgvktod.supabase.co",
+    SUPABASE_KEY: "sb_publishable_daRLZ6Q95TTSovPQrcyqeA_QqewHBOP"
+  };
+
+
+  
+  document.title = CONFIG.PRODUCT_NAME + " | Early access";
+  document.querySelectorAll("[data-bind]").forEach(function (el) { el.textContent = CONFIG[el.dataset.bind]; });
+
+  var yearEl = document.getElementById("year");
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+
+  // Waveform bars
+  var wave = document.getElementById("wave");
+  for (var i = 0; i < 36; i++) {
+    var bar = document.createElement("i");
+    var h = 25 + Math.round(75 * Math.abs(Math.sin(i * 0.55) * Math.cos(i * 0.21)));
+    bar.style.setProperty("--h", h);
+    bar.style.setProperty("--d", (i * 0.07).toFixed(2) + "s");
+    wave.appendChild(bar);
+  }
+
+    // Terms and Privacy dialogs
+  document.querySelectorAll("[data-open]").forEach(function (b) {
+    b.addEventListener("click", function (e) {
+      var d = document.getElementById(b.dataset.open);
+      if (!d) return;
+      e.preventDefault();
+      if (typeof d.showModal === "function") {
+        d.showModal();
+      } else {
+        d.setAttribute("open", ""); 
+      }
+    });
+  });
+  document.querySelectorAll("[data-close]").forEach(function (b) {
+    b.addEventListener("click", function () { b.closest("dialog").close(); });
+  });
+  
+  document.querySelectorAll("dialog").forEach(function (d) {
+    d.addEventListener("click", function (e) {
+      if (e.target === d) d.close();
+    });
+  });
+
+  // Sign-up form
+  var form = document.getElementById("signup");
+  var errorEl = document.getElementById("error");
+  var submitBtn = document.getElementById("submit");
+  var EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+  var nameEl = document.getElementById("name");
+  var emailEl = document.getElementById("email");
+  var useCaseEl = document.getElementById("use_case");
+  var languageEl = document.getElementById("language");
+  var consentEl = document.getElementById("consent");
+  var companyEl = document.getElementById("company");
+
+  function showError(msg) { errorEl.textContent = msg; errorEl.scrollIntoView({ block: "nearest" }); }
+
+  function showDone(name, email, already) {
+    form.hidden = true;
+    var done = document.getElementById("done");
+    var first = name.split(" ")[0];
+    document.getElementById("done-title").textContent = already ? "You're already signed up." : "You're in, " + first + ".";
+    document.getElementById("done-msg").textContent = already
+      ? email + " is already on the early-access list."
+      : "We'll email " + email + " when early access opens.";
+    done.hidden = false;
+    done.focus();
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    showError("");
+
+    var name = nameEl.value.trim();
+    var email = emailEl.value.trim().toLowerCase();
+    var useCase = useCaseEl.value || null;
+    var language = languageEl.value || null;
+
+    if (!name) { showError("Enter your full name."); nameEl.focus(); return; }
+    if (name.length > 100) { showError("Your name is too long. Use 100 characters or fewer."); nameEl.focus(); return; }
+    if (!useCase) { showError("Choose what you'll mainly use the tool for."); useCaseEl.focus(); return; }
+    if (email.length > 254 || !EMAIL_RE.test(email)) { showError("Enter a valid email address, like name@example.com."); emailEl.focus(); return; }
+    if (!language) { showError("Choose the language you'll use the tool in."); languageEl.focus(); return; }
+    if (!consentEl.checked) { showError("Tick the box to agree to the Terms and Privacy Notice."); consentEl.focus(); return; }
+
+    // Honeypot: bots fill the hidden field. Pretend it worked, store nothing.
+    if (companyEl.value) { showDone(name, email, false); return; }
+
+    if (!CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_KEY) {
+      showError("Sign-up isn't connected yet. Add your Supabase URL and key in the CONFIG block of index.html.");
+      return;
+    }
+
+    var params = new URLSearchParams(location.search);
+    var source = (params.get("src") || params.get("utm_source") || "").slice(0, 50) || null;
+
+    var headers = {
+      "apikey": CONFIG.SUPABASE_KEY,
+      "Content-Type": "application/json",
+      "Prefer": "return=minimal"
+    };
+  
+    if (CONFIG.SUPABASE_KEY.indexOf("eyJ") === 0) headers["Authorization"] = "Bearer " + CONFIG.SUPABASE_KEY;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Saving...";
+
+    fetch(CONFIG.SUPABASE_URL.replace(/\/$/, "") + "/rest/v1/waitlist_signups", {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({ name: name, email: email, use_case: useCase, language: language, consent: true, source: source })
+    }).then(function (res) {
+      if (res.ok) { showDone(name, email, false); }
+      else if (res.status === 409) { showDone(name, email, true); }
+      else { throw new Error("HTTP " + res.status); }
+    }).catch(function () {
+      showError("We couldn't save your details. Check your connection and try again.");
+    }).then(function () {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Get early access";
+    });
+  });
+</script>
+</body>
+</html>
